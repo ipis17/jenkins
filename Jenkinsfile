@@ -1,31 +1,39 @@
-node {
-
-    stage('Initialize')
-    {
-        def dockerHome = tool 'MyDocker'
-        def mavenHome  = tool 'MyMaven'
-        env.PATH = "${dockerHome}/bin:${mavenHome}/bin:${env.PATH}"
+pipeline {
+    agent any
+    //agent { docker { image 'maven:3.6.3' } }
+    environment {
+        dockerHome = tool 'MyDocker'
+        mavenHome = tool 'MyMaven'
+        PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
     }
-
-    stage('Checkout') 
-    {
-        checkout scm
+    stages {
+        stage('Build'){
+            steps{
+                sh 'mvn --version'
+                sh 'docker version'
+                echo "Build"
+            }
+        }
+        stage('Test'){
+            steps{
+                echo "Test"
+            }
+        }
+        stage('Integration Test'){
+            steps{
+                echo "Integration Test"
+            }
+        }
+    } 
+    post{
+        always{
+            echo "I run always"
+        }
+        success{
+            echo "I run sucess"
+        }
+        failure{
+            echo "I run failure"
+        }
     }
-
-      stage('Build') 
-           {
-            sh 'uname -a'
-            sh 'mvn -B -DskipTests clean package'  
-          }
-
-        stage('Test') 
-        {
-            //sh 'mvn test'
-            sh 'ifconfig' 
-        }
-
-        stage('Deliver') 
-          {
-                sh 'bash ./jenkins/deliver.sh'
-        }
 }
